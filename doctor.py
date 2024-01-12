@@ -22,3 +22,7 @@ class Doctor(Patient):
     @property
     def id(self):
         return self._id
+
+    @property
+    def expertise(self):
+        return self._expertise
