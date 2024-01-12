@@ -87,3 +87,10 @@ class Clinic:
             return NoSuchDoctor
         else:
             return res
+        
+    def doctorsPatient_sum(self):
+        for dict in self.patient_to_doctor:
+            
+            
+    def doctorByNumPatien(self):
+        
