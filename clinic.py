@@ -1,13 +1,13 @@
 from patient import Patient
 from exceptions import NoSuchPatient, NoSuchDoctor
 from doctor import Doctor
-from collections import Counter
 
 class Clinic:
     def __init__(self, name) -> None:
         self._name = name
         self._patient_list: list[Patient] = []
         self._doctor_list: list[Doctor] = []
+        self.somethig = None
 
     def add_patient(self, new_patient:Patient): ###
         self._patient_list.append(new_patient)
