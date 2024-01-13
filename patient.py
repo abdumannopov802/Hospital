@@ -3,9 +3,7 @@ class Patient:
         self._f_name = f_name
         self._l_name = l_name
         self._ssn = ssn
-
-    # def get_Doctor(self, patient_ssn):
-    #     return Clinic.get_Doctor(Clinic, patient_ssn)
+        self._doctor = None
 
     @property
     def lname(self):
@@ -18,3 +16,7 @@ class Patient:
     @property
     def ssn(self):
         return self._ssn
+    
+    @property
+    def doctor(self):
+        return self._doctor

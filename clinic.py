@@ -1,89 +1,104 @@
 from patient import Patient
 from exceptions import NoSuchPatient, NoSuchDoctor
 from doctor import Doctor
+from collections import Counter
 
 class Clinic:
     def __init__(self, name) -> None:
         self._name = name
         self._patient_list: list[Patient] = []
         self._doctor_list: list[Doctor] = []
-        self._patient_assigned_doctor = []
-    
-    @property
-    def patient_to_doctor(self):
-        for i in range(len(self._patient_assigned_doctor)):
-            yield dict(self._patient_assigned_doctor[i])
 
-    def add_patient(self, new_patient:Patient):
+    def add_patient(self, new_patient:Patient): ###
         self._patient_list.append(new_patient)
-        return new_patient, "Bemor qo'shildi"
+        return new_patient
 
-    def get_patient(self, ssn):
+    def get_patient(self, ssn): ###
         for person in self._patient_list:
             if person.ssn == ssn:
-                return person, "Bemor bor"
+                return person
         else:
-            return NoSuchPatient
+            return NoSuchPatient(ssn)
     
-    def add_doctor(self, new_doctor:Doctor):
+    def add_doctor(self, new_doctor:Doctor): ###
         self._doctor_list.append(new_doctor)
-        return new_doctor, "Doctor qo'shildi"
+        return new_doctor
     
-    def get_doctor(self, id):
+    def get_doctor(self, id): ###
         for doctor in self._doctor_list:
             if doctor.id == id:
-                return doctor, "Doctor bor"
+                return doctor
         else:
-            return NoSuchPatient
+            return NoSuchDoctor(id)
     
-    # def new_func(self, patient_ssn, doctor_id):
-    #     while next(patient.ssn == patient_ssn for patient in self._patient_list):
-    #         while next(doctor.id == doctor_id for doctor in self._doctor_list):
-    #             for patient in self._patient_list:
-    #                 if patient.ssn == patient_ssn:
-    #                     yield patient.ssn
-    #                     for doctor in self._doctor_list:
-    #                         if doctor.id == doctor_id:
-    #                             yield doctor.id
-    #                             get = {patient.ssn: doctor.id}
-    #         return NoSuchDoctor
-    #     self._patient_assigned_doctor.append(get)
-    #     return get, "Bemor docktorga biriktirildi"
-
-    def assign_Patient_to_Doctor(self, patient_ssn:Patient.ssn, doctor_id:Doctor.id):
-        for patient in self._patient_list:
-            # if next(patient.ssn == patient_ssn for patient in self._patient_list):
-
-                if patient.ssn == patient_ssn:
-                    for doctor in self._doctor_list:
-
-                        if doctor.id == doctor_id:
-                            get = {patient_ssn : doctor_id}
-                        # else:
-                        #     return NoSuchDoctor, "Doctor topilmadi"
-            # else:
-            #     return NoSuchPatient, "Bemor topilmadi"
-              
-        self._patient_assigned_doctor.append( get )
-        return get, "Bemor doctorga biriktirildi"
+    def assign_Patient_to_Doctor(self, ssn, id): ###
+        patient: Patient = self.get_patient(ssn)
+        doctor: Doctor = self.get_doctor(id)
+        if patient != NoSuchPatient:
+            if doctor != NoSuchDoctor:
+                patient._doctor = doctor
+                doctor.add_patient(patient)
+                return f"{ssn}-SSN bemor {id}-ID shifokorga biriktirildi"
+            else:
+                return NoSuchDoctor(id)
+        else:
+            return NoSuchPatient(ssn)
         
-    def get_Doctor(self, patient_ssn):
-        for i in range(len(self._patient_assigned_doctor)):
-            assigned_info =  dict(self._patient_assigned_doctor[i])
-            for ssn in assigned_info:
-                if ssn == patient_ssn:
-                    return f"{ssn}-SSNga biriktirilgan shifokor -> ID{assigned_info[ssn]}"
-        return NoSuchPatient
-    
-    def get_Patients(self, doctor_id):
-        res = []
-        for i in range(len(self._patient_assigned_doctor)):
-            assigned_info = dict(self._patient_assigned_doctor[i])
-            for id in assigned_info:
-                if assigned_info[id] == doctor_id:
-                    get = f"{assigned_info[id]}_ID shifokoriga biriktirilgan bemor {id}-SSN"
-                    res.append(get)
-        if res == []:
-            return NoSuchDoctor
+    def get_Doctor(self, patient_ssn): ###
+        for patient in self._patient_list:
+            if patient.ssn == patient_ssn:
+                if patient._doctor != None:
+                    return patient._doctor
+                else:
+                    return f"{patient.ssn}-SSN bemor doctorga biriktirilmagan"
+        return NoSuchPatient(patient_ssn)    
+
+    def get_Patients(self, doctor_id): ###
+        doctor: Doctor = self.get_doctor(doctor_id)
+        if doctor != doctor:
+            return doctor.patients
         else:
-            return res
+            return NoSuchDoctor(doctor_id)
+        
+    def idel_Doctors(self): ###
+        idle_doctors_list = []
+        for doctor in self._doctor_list:
+            if doctor.patients == []:
+                idle_doctors_list.append(doctor)
+
+        if idle_doctors_list != []:
+            return idle_doctors_list
+        else:
+            return "Bemorga biriktirilmagan doctorlar mavjud emas"
+    
+    def busy_Doctors(self): ###
+        busy_doctors_list = []
+        for doctor in self._doctor_list:
+            if doctor.patients != []:
+                if len(doctor.patients) > self.ortacha_bemorlar_soni():
+                    busy_doctors_list.append(doctor)
+        if busy_doctors_list != []:
+            return busy_doctors_list
+        else:
+            return "O'rtacha bemor sonidan ko'p bemorlari bor bo'lgan shifokorlar mavjud emas"
+        
+    def doctorsByNumberPatients(self): ###
+        resoult_list = []
+        for doctor in self._doctor_list:
+            get = f"{len(doctor.patients)}: {doctor.lname} {doctor.fname}"
+            resoult_list.append(get)
+        return resoult_list
+    
+    def countPatientsPerSpecialization(self): ###
+        resoult_list = []
+        for doctor in self._doctor_list:
+            get = f"{len(doctor.patients)}: {doctor.expertise}"
+            resoult_list.append(get)
+        resoult_list.sort()
+        resoult_list.reverse()
+        return resoult_list
+    
+    def ortacha_bemorlar_soni(self): ###
+        length = len(self._patient_list)
+        arifmetik = length // 2
+        return arifmetik
